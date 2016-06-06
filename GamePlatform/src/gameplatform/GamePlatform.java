@@ -7,72 +7,62 @@ import java.io.*;
 import java.net.*;
 
 
-public class GamePlatform extends JFrame{
-    //SignIn Dialog Objects
+public class GamePlatform {
+    public int currentUserIndex ;
+    public String currentUserID = "";
+    public String currentUserPW = "";
+    public String currentUserName = "";
     public JDialog SignIn;
-public int currentUserIndex ;
-public String currentUserID = "";
-public String currentUserPW = "";
-public String currentUserName = "";
-public int maxNumberOfUsers = 20;
-public int numberOfUsers = 0;
-public UserData[] userData = new UserData[maxNumberOfUsers];
     public JDialog userDataD;
     public ImageIcon MyHeadImg = new ImageIcon(".\\Img\\MyHead.jpg");
     public ImageIcon Enemy1Img = new ImageIcon(".\\Img\\Lazy.jpg");
     public ImageIcon Enemy2Img = new ImageIcon(".\\Img\\Chrng.jpg");
     public ImageIcon Enemy3Img = new ImageIcon(".\\Img\\Sena.png");
     public TcpGameClient TGC;
-
+    public JTextArea chatDisplay;
+    public JFrame Lobby;
     
     GamePlatform(){
-    
-        for (int i=0;i<maxNumberOfUsers;i++){
-            userData[i] = new UserData();
-        }
         createSignIn();
         //socketTester();
         try{    TGC = new TcpGameClient();    }
         catch(Exception E){     System.out.println(E);        }
-        
-        
-                
-        createAccount("a","a","主人");
+
         //createGamePlatform();
-        
-        
-        
-    
     }
     
     public void createGamePlatform(){
-        //setVisible(true);
         
-        super.setLayout(null);
-        super.setTitle("遊戲大廳");
-        setBounds(100,250,600,550);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Lobby = new JFrame();
+        Lobby.setVisible(true);
+        Lobby.setLayout(null);
+        Lobby.setTitle("遊戲大廳");
+        Lobby.setBounds(100,250,600,550);
+        Lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         setGamePlatformUI();
-        
-        JButton Back = new JButton("Back");
-        add(Back);
-        
-        add(new JLabel("對戰角色"));
-        add(new JLabel("聊天室"));
-
-
-        BorderLayout bl = (BorderLayout)getLayout();
-        bl.setVgap(10);
-        
-        Back.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent AE){
-                setVisible(false);
-                SignIn.setVisible(true);
+        Thread messageHandler = new Thread(){
+            public void run(){
+                String chatMessage = "";
+                //System.out.println("in messageHandler");
+                while(true){
+                    //System.out.println("messageHandlerFlag in mH: "+ messageHandlerFlag);
+                    if(chatMessage.equals("leaveLobby"))    break;
+                    try{
+                        //System.out.println("in getInputString up");
+                        chatMessage = getInputString();
+                        //System.out.println("in getInputString down");
+                        System.out.println("chatMessage: "+chatMessage);
+                        chatDisplay.append(chatMessage+"\n");
+                        //Thread.sleep(3000);
+                    }catch(Exception e){}
+                    
+                }
+            
             }
-        });
+        };
         
-        
+        messageHandler.start();
         
     }
     public void setGamePlatformUI(){
@@ -80,17 +70,17 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         JLabel Name = new JLabel("親愛的 【" + currentUserName +" 】你好");
         
         Name.setBounds(200,10,200,20);
-        add(Name);
+        Lobby.add(Name);
         /*  返回按鈕    */
         JButton Back = new JButton("返回");
         Back.setBounds(500,10,70,30);
-        add(Back);
+        Lobby.add(Back);
         
         
         /*  分隔線  */
         JSeparator topS = new JSeparator();
         topS.setBounds(50,50,500,10);
-        add(topS);
+        Lobby.add(topS);
         
         /*  房間內玩家 - 自己    */
         JLabel MyName = new JLabel(  );
@@ -99,55 +89,55 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         JButton MyHeadB = new JButton();
         MyHeadB.setIcon(MyHeadImg);
         MyHeadB.setBounds(50,90,100,100);
-        add(MyName);
-        add(MyHeadB);
+        Lobby.add(MyName);
+        Lobby.add(MyHeadB);
         
         /*  房間內玩家 - 別人   */
         JLabel Enemy1 = new JLabel("Lazy");
         Enemy1.setBounds(240,60,100,20);
-        add(Enemy1);
+        Lobby.add(Enemy1);
         JButton Enemy1B = new JButton();
         Enemy1B.setIcon(Enemy1Img);
         Enemy1B.setBounds(200,90,100,100);
-        add(Enemy1B);
+        Lobby.add(Enemy1B);
         
         JLabel Enemy2 = new JLabel("Chrng");
         Enemy2.setBounds(350,60,100,20);
-        add(Enemy2);
+        Lobby.add(Enemy2);
         JButton Enemy2B = new JButton();
         Enemy2B.setIcon(Enemy2Img);
         Enemy2B.setBounds(320,90,100,100);
-        add(Enemy2B);
+        Lobby.add(Enemy2B);
 
         JLabel Enemy3 = new JLabel("Cena");
         Enemy3.setBounds(470,60,100,20);
-        add(Enemy3);
+        Lobby.add(Enemy3);
         JButton Enemy3B = new JButton();
         Enemy3B.setIcon(Enemy3Img);
         Enemy3B.setBounds(440,90,100,100);
-        add(Enemy3B);
+        Lobby.add(Enemy3B);
         //分隔線
         JSeparator topD = new JSeparator();
         topD.setBounds(50,210,500,10);
-        add(topD);
+        Lobby.add(topD);
         
         /*  聊天室  */
-        JTextArea chatDisplay = new JTextArea();
+        chatDisplay = new JTextArea();
         chatDisplay.setBounds(50,230,500,200);
-        add(chatDisplay);
+        Lobby.add(chatDisplay);
         JTextField chatInput = new JTextField();
         chatInput.setBounds(50,440,500,30);
-        add(chatInput);
+        Lobby.add(chatInput);
         
-        messageHandler(chatDisplay);
+        //messageHandler(chatDisplay);
         
         
         Back.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
-                dispose();
-                Name.setText("");
-                MyName.setText("");
-                //setVisible(false);
+                //messageHandlerFlag = false;
+                //System.out.println("messageHandlerFlag in Back: "+ messageHandlerFlag);
+                Lobby.dispose();
+                writeOutString("leaveLobby");
                 SignIn.setVisible(true);
             }
         });
@@ -158,8 +148,10 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
                 //chatDisplay.setText(chatInput.getText());
                 //String temp = chatInput.getText();
                 //System.out.println(temp);
-                System.out.println(chatInput.getText());
-                chatDisplay.append(currentUserName+": "+chatInput.getText()+"\n");
+                //System.out.println(chatInput.getText());
+                //chatDisplay.append(currentUserName+": "+chatInput.getText()+"\n");
+                
+                writeOutString(chatInput.getText());
                 chatInput.setText("");
                 
                 
@@ -172,9 +164,7 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         
     }
     
-    public void messageHandler(JTextArea display){
 
-    }
     
     public void writeOutString(String data){
         try{    
@@ -194,7 +184,6 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         }
         return inputString;
     }
-    
     
     public void socketTester(){
         JDialog jd = new JDialog();        jd.setBounds(100,250,300,200);    jd.setVisible(true);
@@ -266,11 +255,12 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
                 writeOutString("authencate");
                 writeOutString(id);
                 writeOutString(pw);
+                System.out.println("in auth = getInputString() up");
                 auth = getInputString();
-                
+                System.out.println("in auth = getInputString() down");
+                System.out.println("auth: "+auth);
                 if(auth.equals("YES") ){
                     setCurrentUserData(getInputString(),id,pw);
-                    System.out.println("client auth is:"+auth);
                     createUserPage();
                     loginTag = true;
                     SignIn.setVisible(false);
@@ -296,7 +286,7 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         
     }
     
-     public void createUserPage(){
+    public void createUserPage(){
         userDataD = new JDialog();
         userDataD.setTitle("會員資料");
         userDataD.setLayout(null);
@@ -338,16 +328,18 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         
         Lobby.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
-                setVisible(true);
+                //messageHandlerFlag = true;
+                Lobby.setVisible(true);
                 userDataD.setVisible(false);
+                writeOutString("gameLobbyInitialize");
                 createGamePlatform();
-                
-                System.out.println("cutName="+currentUserName);
+                //System.out.println("cutName="+currentUserName);
             }
         });
         
         Back.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
+
                 userDataD.setVisible(false);
                 SignIn.setVisible(true);
             }
@@ -430,30 +422,15 @@ public UserData[] userData = new UserData[maxNumberOfUsers];
         });
    
     } 
-    
-public void createAccount(String ID, String PW, String Name){
-        userData[numberOfUsers].ID=ID;
-        userData[numberOfUsers].PW=ID;
-        userData[numberOfUsers].Name=Name;
-        
-        numberOfUsers++;
-         
-}
  
-public void setCurrentUserData(String Name, String ID, String PW){
+    public void setCurrentUserData(String Name, String ID, String PW){
         
         System.out.println("Name="+Name);
         currentUserName = Name;
         currentUserID = ID;
         currentUserPW = PW;
     }
-    
-public boolean isIDExist(String targetID){
-        for (int i=0; i<numberOfUsers;i++)
-            if ( targetID.equals(userData[i].ID))   return true;
-        return false;
-    }
-  
+
     public static void main(String[] args) {
         new GamePlatform();
         

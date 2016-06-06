@@ -6,14 +6,19 @@ import java.util.*;
 
 
 public class GameServer {
-    public static int currentUserIndex ;
+    private static ArrayList<clientConnection> clientList;
+    public static ServerSocket server;
     public static int maxNumberOfUsers = 20;
-    public static int numberOfUsers = 0;
     public static UserData[] userData = new UserData[maxNumberOfUsers];
-    public static String currentUserID = "";
-    public static String currentUserPW = "";
-    public static String currentUserName = "";
     
+    public static int port = 8881;
+    
+    
+    public static int numberOfUsers = 0;
+    
+    
+    
+
     public static void createAccount(String ID, String PW, String Name){
         
         userData[numberOfUsers].ID=ID;
@@ -23,28 +28,20 @@ public class GameServer {
         numberOfUsers++;
          
     }
-    
-    public static void setCurrentUserData(String Name, String ID, String PW,int index){
-        
-        System.out.println("Name="+Name);
-        currentUserIndex = index;
-        currentUserName = Name;
-        currentUserID = ID;
-        currentUserPW = PW;
+    public static void serverSocketInitializer() throws Exception{
+        server = new ServerSocket(port);   System.out.println("server run on: "+port);
     }
+    public static void userAccountInitializer(){
+        //currentUserIndex = numberOfUsers;
+        for (int i=0;i<maxNumberOfUsers;i++){
+                userData[i] = new UserData();
+        }
+        createAccount("a","a","owner"); createAccount("b","b","maid");  createAccount("c","c","little bear");
+    };
+    //public static void acceptSocketThread(){};
     
-    public static String authentication(String id, String pw){
-            for (int i=0; i<numberOfUsers;i++){
-                    if ( id.equals(userData[i].ID) && pw.equals(userData[i].PW)){
-                        setCurrentUserData(userData[i].Name,userData[i].ID,userData[i].PW,i);
-                         System.out.println("["+id+"]: authencate successful");                        
-                         return "YES";
-                    }
-            }
-            //System.out.println("test NO");
-            System.out.println("["+id+"]: authencate failed"); 
-            return "NO";
-    }
+    
+    
     
     public static boolean isIDExist(String targetID){
         for (int i=0; i<numberOfUsers;i++)
@@ -52,106 +49,172 @@ public class GameServer {
         return false;
     }
     
-    GameServer(){
-        for (int i=0;i<maxNumberOfUsers;i++){
-                userData[i] = new UserData();
-        }
-        currentUserIndex = numberOfUsers;
-        createAccount("a","a","owner");
-        createAccount("b","b","maid");
-        createAccount("c","c","little bear");
-        //System.out.println(userData[currentUserIndex].Name);
+    
+    public GameServer() throws Exception{
+        clientList = new ArrayList<clientConnection>();
+        serverSocketInitializer();
+        userAccountInitializer();
+        
+        Thread accept = new Thread(){
+            public void run(){
+                //System.out.println("in run");
+                while(true){
+                    try{
+                        Socket socket = server.accept();
+                        System.out.println("new connection from"+socket.getRemoteSocketAddress());
+                        clientList.add(new clientConnection(socket) );
+                    }catch(IOException IOE){
+                        IOE.printStackTrace();
+                    }
+                }
+            }
+        };
+        //accept.setDaemon(true);
+        accept.start();
+        
     }
     
     public static void main(String[] args) throws Exception{
-        int port = 8881;
-        ServerSocket server = new ServerSocket(port);   System.out.println("server run on: "+port);
-        
         new GameServer();
-        while(true){
-            Socket socket = server.accept();
-            System.out.println("new connection from"+socket.getRemoteSocketAddress());
-            new Thread(new Task(socket) {}).start();
-        }
+        
         
         
     }
     
-      static class Task implements Runnable{
+    public class clientConnection {
         public Socket socket;
         public BufferedReader input;
         public DataOutputStream output;
         public String clientMessage;
         
-        public Task(Socket socket){
-            this.socket = socket;
-        }
-        public void run(){
-            //System.out.println("in run");
-            try{
-                socketHandler();
+        public  String currentUserID = "";
+        public  String currentUserPW = "";
+        public  String currentUserName = "";
+        public  int currentUserIndex ;
+        
+        public String authentication(String id, String pw){
+            for (int i=0; i<numberOfUsers;i++){
+                    if ( id.equals(userData[i].ID) && pw.equals(userData[i].PW)){
+                        setCurrentUserData(userData[i].Name,userData[i].ID,userData[i].PW,i);
+                        System.out.println("["+id+"]: authencate successful");                        
+                        return "YES";
+                    }
             }
-            catch(IOException IOE){
-                System.out.println(IOE);
-            }
-
+            //System.out.println("test NO");
+            System.out.println("["+id+"]: authencate failed"); 
+            return "NO";
         }
-/*
-        public void chatHandler() throws IOException{
-            while(true){
-                clientMessage = input.readLine();
+        public void setCurrentUserData(String Name, String ID, String PW,int index){
             
-            }
+            currentUserIndex = index;
+            currentUserName = Name;
+            currentUserID = ID;
+            currentUserPW = PW;
+            
         }
-*/
-        private void socketHandler() throws IOException{
+        
+        public clientConnection(Socket socket) throws IOException{
+            this.socket = socket;
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new DataOutputStream(socket.getOutputStream());
-            //System.out.println("in socketHandler");
-            welcomeMessage();
+            
+            Thread socketHandler = new Thread(){
+                public void run(){
+                    //String currentName = 
+                    try{
+                        socketHandler();
+                    }
+                    catch(IOException IOE){
+                        System.out.println(IOE);
+                    }
+                }
+            };
+            //socketHandler.setDaemon(true);
+            socketHandler.start();
+            /*
+            Thread messageHandling = new Thread(){
+                public void run(){
+                    while(true){
+                        try{
+                            clientMessage = input.readLine();
+                            System.out.println("clientMessage: " + clientMessage);
+                        }catch(Exception E){
+                        }
+                    }
+                }
+            };
+            //messageHandling.setDaemon(true);
+            messageHandling.start();
+            */    
+        }
+        
+   
+        public void H1() throws IOException{
             while(true){
                 clientMessage = input.readLine();
-                
+                System.out.println("clientMessage: "+clientMessage);
                 if(clientMessage.equals("authencate")){
-                    System.out.println("["+socket.getRemoteSocketAddress()+"]: is "+ "authenticating");
                     String id = input.readLine();
                     String pw = input.readLine();
                     String auth = "";
                     auth = authentication(id,pw);
-                    
+                    System.out.println("f_auth: "+auth);
                     output.writeBytes(auth+"\n");   //登入結果寫回client端 YES/NO
                     
                     if(auth.equals("YES")){
-                        System.out.println("current user index: "+currentUserIndex);
+                    System.out.println("current user index: "+currentUserIndex);
                         output.writeBytes(currentUserName+"\n");
                     }
                 }
                 else if(clientMessage.equals("regist")){
-                    System.out.println("["+socket.getRemoteSocketAddress()+"]: is "+ "registing");
                     String id = input.readLine();
                     String pw = input.readLine();
                     String name = input.readLine();
                     String reg ="";
                     if(isIDExist(id))   reg="NO";  else reg="YES";
                     
-                    System.out.println("server reg is:"+reg);
+                    //System.out.println("server reg is:"+reg);
                     output.writeBytes(reg+"\n");    //註冊結果寫回client端 YES/NO
                     
                     if(reg.equals("YES")){
-                        System.out.println("["+socket.getRemoteSocketAddress()+"]: regist successful");
+                    System.out.println("["+socket.getRemoteSocketAddress()+"]: regist successful");
                         createAccount(id,pw,name);
                         
                     }
                 }
-                    
-                
-                if(!clientMessage.equals("ov")){
-                    //System.out.println("["+socket.getRemoteSocketAddress()+"]: "+ clientMessage);
-                    //output.writeBytes(clientMessage);
-                }else{
-                    System.out.println("["+socket.getRemoteSocketAddress()+"] 已斷線" );
-                    break;
+                else if(clientMessage.equals("gameLobbyInitialize")){
+                    System.out.println("["+currentUserID+"]: enterLobby");
+
+                    while(true){
+                         clientMessage = input.readLine();
+                         if(clientMessage.equals("leaveLobby")){
+                             System .out.println("["+currentUserID+"]: leaveLobby");
+                             output.writeBytes(clientMessage+"\n");
+                             break;
+                         }
+                         else{
+                             System.out.println("clientMessage: "+clientMessage);
+                             sendToAll("["+currentUserName+"] says: "+clientMessage);
+                         }
+
+                    }
                 }
+
+                
+            }
+        }
+        private void socketHandler() throws IOException{
+            welcomeMessage();
+            H1();
+            
+            
+        }
+        
+        public void writeOutString(String data){
+            try{    
+                output.writeBytes(data+"\n");     
+            } catch(Exception E){
+                System.out.println(E);
             }
         }
         
@@ -159,10 +222,21 @@ public class GameServer {
             output.writeBytes("welcome to GameServer\n");
         }
         
-        
-        
-        
-        
+        public void write(String message) throws IOException{
+            //System.out.println("message in write is: "+message);
+            output.writeBytes(message+"\n");
+        }
     }
+    public static void sendToOne(){
     
+    }
+    public static void sendToAll(String message) throws IOException{
+       //System.out.println("in sendToAll");
+        for(clientConnection client : clientList ){
+            //System.out.println("in for");
+            client.write(message);
+        }
+    }
+
+      
 }
