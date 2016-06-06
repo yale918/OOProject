@@ -3,41 +3,46 @@ package gameplatform;
 import java.awt.event.*;
 import java.awt.*;
 import javax.swing.*;
-
-
+import java.io.*;
+import java.net.*;
 
 
 public class GamePlatform extends JFrame{
     //SignIn Dialog Objects
     public JDialog SignIn;
-    public int currentUserIndex ;
-    public String currentUserID = "";
-    public String currentUserPW = "";
-    public String currentUserName = "";
-    public int maxNumberOfUsers = 20;
-    public int numberOfUsers = 0;
-    public UserData[] userData = new UserData[maxNumberOfUsers];
+public int currentUserIndex ;
+public String currentUserID = "";
+public String currentUserPW = "";
+public String currentUserName = "";
+public int maxNumberOfUsers = 20;
+public int numberOfUsers = 0;
+public UserData[] userData = new UserData[maxNumberOfUsers];
     public JDialog userDataD;
     public ImageIcon MyHeadImg = new ImageIcon(".\\Img\\MyHead.jpg");
     public ImageIcon Enemy1Img = new ImageIcon(".\\Img\\Lazy.jpg");
     public ImageIcon Enemy2Img = new ImageIcon(".\\Img\\Chrng.jpg");
     public ImageIcon Enemy3Img = new ImageIcon(".\\Img\\Sena.png");
-    
+    public TcpGameClient TGC;
 
     
     GamePlatform(){
+    
         for (int i=0;i<maxNumberOfUsers;i++){
             userData[i] = new UserData();
         }
-        createAccount("a","a","主人");
-        //createGamePlatform();
         createSignIn();
-        try{    TcpGameClient TGC = new TcpGameClient();    }
+        //socketTester();
+        try{    TGC = new TcpGameClient();    }
         catch(Exception E){     System.out.println(E);        }
         
         
+                
+        createAccount("a","a","主人");
+        //createGamePlatform();
         
         
+        
+    
     }
     
     public void createGamePlatform(){
@@ -73,18 +78,14 @@ public class GamePlatform extends JFrame{
     public void setGamePlatformUI(){
         /*  冒險者稱謂  */
         JLabel Name = new JLabel("親愛的 【" + currentUserName +" 】你好");
+        
         Name.setBounds(200,10,200,20);
         add(Name);
         /*  返回按鈕    */
         JButton Back = new JButton("返回");
         Back.setBounds(500,10,70,30);
         add(Back);
-        Back.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent AE){
-                setVisible(false);
-                SignIn.setVisible(true);
-            }
-        });
+        
         
         /*  分隔線  */
         JSeparator topS = new JSeparator();
@@ -92,7 +93,8 @@ public class GamePlatform extends JFrame{
         add(topS);
         
         /*  房間內玩家 - 自己    */
-        JLabel MyName = new JLabel( currentUserName );
+        JLabel MyName = new JLabel(  );
+        MyName.setText(currentUserName);
         MyName.setBounds(90,60,100,20);
         JButton MyHeadB = new JButton();
         MyHeadB.setIcon(MyHeadImg);
@@ -137,6 +139,19 @@ public class GamePlatform extends JFrame{
         chatInput.setBounds(50,440,500,30);
         add(chatInput);
         
+        messageHandler(chatDisplay);
+        
+        
+        Back.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent AE){
+                dispose();
+                Name.setText("");
+                MyName.setText("");
+                //setVisible(false);
+                SignIn.setVisible(true);
+            }
+        });
+        
         chatInput.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
                 //chatInput.setText("");
@@ -146,13 +161,58 @@ public class GamePlatform extends JFrame{
                 System.out.println(chatInput.getText());
                 chatDisplay.append(currentUserName+": "+chatInput.getText()+"\n");
                 chatInput.setText("");
+                
+                
+                //MyName.setText("");
                 //System.out.println("hello world");
             }
         });
         
+        
+        
+    }
+    
+    public void messageHandler(JTextArea display){
+
+    }
+    
+    public void writeOutString(String data){
+        try{    
+            TGC.output.writeBytes(data+"\n");     
+        } catch(Exception E){
+            System.out.println(E);
+        }
+    }
+    
+    public String getInputString(){
+        String inputString="";
+        
+        try{    
+             inputString = TGC.input.readLine();     
+        } catch(Exception E){
+            System.out.println(E);
+        }
+        return inputString;
     }
     
     
+    public void socketTester(){
+        JDialog jd = new JDialog();        jd.setBounds(100,250,300,200);    jd.setVisible(true);
+        jd.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        jd.setLayout(null);
+        JTextField jtf = new JTextField();              jtf.setBounds(50,50,100,30);     jd.add(jtf);
+        //jtf.setText();
+        JButton jb = new JButton("送出");                     jb.setBounds(50,80,70,30);      jd.add(jb);
+        
+        
+         
+        jb.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent AE){
+                writeOutString(jtf.getText());
+            }
+        });
+        
+    }
     
     public void createSignIn(){
         
@@ -196,24 +256,29 @@ public class GamePlatform extends JFrame{
         
         SignIn.setVisible(true);
         
-        logIn.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent AE){
+        logIn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent AE) {
                 boolean loginTag = false;
                 String id = ID_T.getText();
                 String pw = PW_T.getText();
-                for (int i=0; i<numberOfUsers;i++){
-                    if ( id.equals(userData[i].ID) && pw.equals(userData[i].PW)){
-                        
-                        setCurrentUserData(userData[i].Name,userData[i].ID,userData[i].PW);
-
-                        createUserPage();
-                        loginTag = true;
-                        SignIn.setVisible(false);
-                    }
+                String auth ="";
+                 
+                writeOutString("authencate");
+                writeOutString(id);
+                writeOutString(pw);
+                auth = getInputString();
+                
+                if(auth.equals("YES") ){
+                    setCurrentUserData(getInputString(),id,pw);
+                    System.out.println("client auth is:"+auth);
+                    createUserPage();
+                    loginTag = true;
+                    SignIn.setVisible(false);
+                    JOptionPane.showMessageDialog(null, "請按確定繼續", "登入成功",JOptionPane.INFORMATION_MESSAGE );
                 }
-                if(loginTag == false){
+                else 
                     JOptionPane.showMessageDialog(null, "請先註冊", "帳號不存在",JOptionPane.INFORMATION_MESSAGE );
-                }
+
         
             }
 
@@ -231,9 +296,7 @@ public class GamePlatform extends JFrame{
         
     }
     
-    
-    
-    public void createUserPage(){
+     public void createUserPage(){
         userDataD = new JDialog();
         userDataD.setTitle("會員資料");
         userDataD.setLayout(null);
@@ -248,18 +311,12 @@ public class GamePlatform extends JFrame{
         JLabel userData_PW = new JLabel("PW： ");
         JLabel userData_PW_VALUE = new JLabel(currentUserPW);
         
-        //System.out.println(numberOfUsers);
-        //System.out.println(userData[0].Name);
-        
-        
         JButton userData_HEAD = new JButton();
         ImageIcon userData_HEAD_ICON = new ImageIcon();
         JButton userData_HEAD_CLICK = new JButton("上傳頭像");
         JButton Lobby = new JButton("進入遊戲大廳");
         JButton Back = new JButton("返回");
         
-        //userDataD.add(userDataL);
-        //userDataL.setBounds(10,10,70,20);
         userDataD.add(userData_NAME);   userData_NAME.setBounds(10,10,50,20);
         userDataD.add(userData_NAME_VALUE);   userData_NAME_VALUE.setBounds(50,10,70,20);
         userDataD.add(userData_ID);     userData_ID.setBounds(10,50,70,20);
@@ -298,7 +355,6 @@ public class GamePlatform extends JFrame{
         
         
     }
-    
     
     public void createRegistPage(){
         //regist page
@@ -339,20 +395,24 @@ public class GamePlatform extends JFrame{
                 String ID = ID_T.getText();
                 String PW = PW_T.getText();
                 String Name = Name_T.getText();
-                //System.out.println("value of isIDExist(ID): "+isIDExist(ID));
-                if(isIDExist(ID)){  JPanel JP = new JPanel();   JOptionPane.showMessageDialog(null, "請重新輸入", "帳號已存在",JOptionPane.INFORMATION_MESSAGE );}
-                else{
-                    //System.out.println("value of isIDExist(ID): "+isIDExist(ID));
-                    userData[numberOfUsers].ID = ID;
-                    userData[numberOfUsers].PW = PW;
-                    userData[numberOfUsers].Name = Name;
-                    //System.out.println("Data["+numberOfUsers+"].ID= "+userData[numberOfUsers].ID);
-                    //System.out.println("Data["+numberOfUsers+"].PW= "+userData[numberOfUsers].PW);
-                    //System.out.println("Data["+numberOfUsers+"].Name= "+userData[numberOfUsers].Name);
-                    numberOfUsers = numberOfUsers + 1;
-                    JOptionPane.showMessageDialog(null, "請手動返回登入頁面", "註冊成功",JOptionPane.INFORMATION_MESSAGE );
-                    //RegistPage.setVisible(false);
+                
+                String reg ="";
+                writeOutString("regist");
+                writeOutString(ID);
+                writeOutString(PW);
+                writeOutString(Name);
+                reg = getInputString();
+                System.out.println("reg is: " +reg);
+                if(reg.equals("YES") ){
+                    
+                    System.out.println("client reg is:"+reg);
+                    RegistPage.setVisible(false);
+                    JOptionPane.showMessageDialog(null, "請按確定繼續", "註冊成功",JOptionPane.INFORMATION_MESSAGE );
                 }
+                else {
+                    JPanel JP = new JPanel();   JOptionPane.showMessageDialog(null, "請重新輸入", "帳號已存在",JOptionPane.INFORMATION_MESSAGE );
+                }
+        
             }
         });
         
@@ -371,17 +431,16 @@ public class GamePlatform extends JFrame{
    
     } 
     
-    public void createAccount(String ID, String PW, String Name){
+public void createAccount(String ID, String PW, String Name){
         userData[numberOfUsers].ID=ID;
         userData[numberOfUsers].PW=ID;
         userData[numberOfUsers].Name=Name;
         
         numberOfUsers++;
          
-    }
-    
-    
-    public void setCurrentUserData(String Name, String ID, String PW){
+}
+ 
+public void setCurrentUserData(String Name, String ID, String PW){
         
         System.out.println("Name="+Name);
         currentUserName = Name;
@@ -389,14 +448,12 @@ public class GamePlatform extends JFrame{
         currentUserPW = PW;
     }
     
-    public boolean isIDExist(String targetID){
+public boolean isIDExist(String targetID){
         for (int i=0; i<numberOfUsers;i++)
             if ( targetID.equals(userData[i].ID))   return true;
         return false;
     }
-    
-    
-    
+  
     public static void main(String[] args) {
         new GamePlatform();
         

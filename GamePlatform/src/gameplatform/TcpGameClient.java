@@ -26,6 +26,7 @@ public class TcpGameClient{
         output = new DataOutputStream(socket.getOutputStream());
         serverMessage = input.readLine();
         System.out.println(serverMessage);
+        /*
         while(true){
             outMessage = readLine();
             if(!outMessage.equals("ov") ){
@@ -41,6 +42,7 @@ public class TcpGameClient{
         input.close();
         output.close();
         socket.close();
+        */
     }
 
     public String readLine(){
