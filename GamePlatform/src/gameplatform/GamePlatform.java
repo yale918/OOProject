@@ -25,6 +25,8 @@ public class GamePlatform {
     public TcpGameClient TGC;
     public JTextArea chatDisplay;
     public JFrame Lobby;
+    public boolean threadFlag;
+    public boolean exitGameFlag;
     
     GamePlatform(){
         createSignIn();
@@ -36,37 +38,69 @@ public class GamePlatform {
     }
         
     public void createGamePlatform(){
+        threadFlag = true;
+        exitGameFlag = false;
         
         Lobby = new JFrame();
         Lobby.setVisible(true);
         Lobby.setLayout(null);
         Lobby.setTitle("遊戲大廳");
         Lobby.setBounds(100,250,600,550);
-        Lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //Lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
         
         setGamePlatformUI();
+        Lobby.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent WE){
+                try{
+                    writeOutString("leaveGame");
+                    //System.out.println("leaveGame");
+                    threadFlag = false;
+                    exitGameFlag = true;
+                    //System.out.println("threadFlag set to false;");
+                    System.exit(0);
+                }
+                catch(Exception E1){
+                    System.out.println("in E1");
+                }
+            }
+        });
         Thread messageHandler = new Thread(){
             public void run(){
+                //int counter =0;
                 String chatMessage = "";
                 //System.out.println("in messageHandler");
-                while(true){
-                    //System.out.println("messageHandlerFlag in mH: "+ messageHandlerFlag);
-                    if(chatMessage.equals("leaveLobby"))    break;
-                    try{
-                        //System.out.println("in getInputString up");
-                        chatMessage = getInputString();
-                        //System.out.println("in getInputString down");
-                        System.out.println("chatMessage: "+chatMessage);
-                        chatDisplay.append(chatMessage+"\n");
-                        //Thread.sleep(3000);
-                    }catch(Exception e){}
-                    
+                //if(threadFlag==true){
+                while(true && threadFlag){
+                    //System.out.println("counter="+counter++);
+                    //System.out.println("threadFlag= "+threadFlag);
+                    //if(chatMessage.equals("leaveLobby"))    break;
+                    //if(chatMessage.equals("leaveGame"))    break;    
+                        try{
+                            //System.out.println("in getInputString up");
+                            chatMessage = getInputString();
+                            //System.out.println("in getInputString down");
+                            System.out.println("chatMessage: "+chatMessage);
+                            chatDisplay.append(chatMessage+"\n");
+                            //Thread.sleep(3000);
+                        }
+                        catch(Exception e){
+                            System.out.println("in e");
+                        }                 
+
                 }
-            
+                if(exitGameFlag)
+                    try{    
+                        TGC.socket.close();
+                        TGC.input.close();
+                        TGC.output.close();
+                    } 
+                    catch(Exception E){}
             }
         };
         
         messageHandler.start();
+        
         
     }
     public void setGamePlatformUI(){
@@ -120,6 +154,9 @@ public class GamePlatform {
         Enemy3B.setIcon(Enemy3Img);
         Enemy3B.setBounds(440,90,100,100);
         Lobby.add(Enemy3B);
+        
+        
+        
         //分隔線
         JSeparator topD = new JSeparator();
         topD.setBounds(50,210,500,10);
@@ -132,44 +169,29 @@ public class GamePlatform {
         JTextField chatInput = new JTextField();
         chatInput.setBounds(50,440,500,30);
         Lobby.add(chatInput);
-        
-        //messageHandler(chatDisplay);
-        
-        
+
         Back.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent AE){
-                //messageHandlerFlag = false;
-                //System.out.println("messageHandlerFlag in Back: "+ messageHandlerFlag);
-                Lobby.dispose();
+            public void actionPerformed(ActionEvent AE){              
                 writeOutString("leaveLobby");
-                SignIn.setVisible(true);
-            }
+                threadFlag = false;
+                Lobby.dispose();
+                
+                userDataD.setVisible(true);
+                
+           }
         });
         
         chatInput.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
-                //chatInput.setText("");
-                //chatDisplay.setText(chatInput.getText());
-                //String temp = chatInput.getText();
-                //System.out.println(temp);
-                //System.out.println(chatInput.getText());
-                //chatDisplay.append(currentUserName+": "+chatInput.getText()+"\n");
-                
                 writeOutString(chatInput.getText());
                 chatInput.setText("");
-                
-                
-                //MyName.setText("");
-                //System.out.println("hello world");
             }
         });
         
         
         
     }
-    
-
-    
+        
     public void writeOutString(String data){
         try{    
             TGC.output.writeBytes(data+"\n");     
@@ -259,10 +281,10 @@ public class GamePlatform {
                 writeOutString("authencate");
                 writeOutString(id);
                 writeOutString(pw);
-                System.out.println("in auth = getInputString() up");
+                //System.out.println("in auth = getInputString() up");
                 auth = getInputString();
-                System.out.println("in auth = getInputString() down");
-                System.out.println("auth: "+auth);
+                //System.out.println("in auth = getInputString() down");
+                //System.out.println("auth: "+auth);
                 if(auth.equals("YES") ){
                     setCurrentUserData(getInputString(),id,pw);
                     createUserPage();
@@ -280,6 +302,24 @@ public class GamePlatform {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
+        
+        SignIn.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent WE){
+                System.out.println("in SignIn close event");
+                try{
+                    writeOutString("leaveGame");
+                    //System.out.println("leaveGame");
+                    threadFlag = false;
+                    //System.out.println("threadFlag set to false;");
+                    System.exit(0);
+                }
+                catch(Exception E1){
+                    System.out.println("in E1");
+                }
+                
+            }
+        });
+    
         
         regist.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
@@ -352,7 +392,22 @@ public class GamePlatform {
             }
         });
         
-        
+        userDataD.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent WE){
+                System.out.println("in userDataD close event");
+                try{
+                    writeOutString("leaveGame");
+                    //System.out.println("leaveGame");
+                    threadFlag = false;
+                    //System.out.println("threadFlag set to false;");
+                    System.exit(0);
+                }
+                catch(Exception E1){
+                    System.out.println("in E1");
+                }
+                
+            }
+        });
     }
     
     public void createRegistPage(){
