@@ -157,7 +157,7 @@ public class GameServer {
                     String id = input.readLine();
                     String pw = input.readLine();
                     String auth = "";
-                    auth = authentication(id,pw);
+                    auth = authentication(id,pw);   //通過則 auth="YES" 否則 auth="NO"
                     System.out.println("f_auth: "+auth);
                     output.writeBytes(auth+"\n");   //登入結果寫回client端 YES/NO
                     

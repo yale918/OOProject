@@ -14,7 +14,7 @@ public class TcpGameClient{
     public Socket socket;
     public DataOutputStream output;
     public BufferedReader input;
-    public String ip = "127.0.0.1";
+    public String ip = "134.208.97.124";
     public int port = 8881;
     public String serverMessage;
     public String outMessage;

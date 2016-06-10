@@ -14,10 +14,14 @@ public class GamePlatform {
     public String currentUserName = "";
     public JDialog SignIn;
     public JDialog userDataD;
-    public ImageIcon MyHeadImg = new ImageIcon(".\\Img\\MyHead.jpg");
-    public ImageIcon Enemy1Img = new ImageIcon(".\\Img\\Lazy.jpg");
-    public ImageIcon Enemy2Img = new ImageIcon(".\\Img\\Chrng.jpg");
-    public ImageIcon Enemy3Img = new ImageIcon(".\\Img\\Sena.png");
+    public ImageIcon MyHeadImg = new ImageIcon("./Img/MyHead.jpg");
+    public ImageIcon Enemy1Img = new ImageIcon("./Img/Lazy.jpg");
+    public ImageIcon Enemy2Img = new ImageIcon("./Img/Chrng.jpg");
+    public ImageIcon Enemy3Img = new ImageIcon("./Img/Sena.png");
+    //public ImageIcon MyHeadImg = new ImageIcon(".\\Img\\MyHead.jpg");
+    //public ImageIcon Enemy1Img = new ImageIcon(".\\Img\\Lazy.jpg");
+    //public ImageIcon Enemy2Img = new ImageIcon(".\\Img\\Chrng.jpg");
+    //public ImageIcon Enemy3Img = new ImageIcon(".\\Img\\Sena.png");
     public TcpGameClient TGC;
     public JTextArea chatDisplay;
     public JFrame Lobby;
@@ -30,7 +34,7 @@ public class GamePlatform {
 
         //createGamePlatform();
     }
-    
+        
     public void createGamePlatform(){
         
         Lobby = new JFrame();
@@ -101,7 +105,7 @@ public class GamePlatform {
         Enemy1B.setBounds(200,90,100,100);
         Lobby.add(Enemy1B);
         
-        JLabel Enemy2 = new JLabel("Chrng");
+        JLabel Enemy2 = new JLabel("Cherng");
         Enemy2.setBounds(350,60,100,20);
         Lobby.add(Enemy2);
         JButton Enemy2B = new JButton();
@@ -302,8 +306,11 @@ public class GamePlatform {
         JLabel userData_PW_VALUE = new JLabel(currentUserPW);
         
         JButton userData_HEAD = new JButton();
-        ImageIcon userData_HEAD_ICON = new ImageIcon();
+        //userData_HEAD.setIcon(MyHeadImg);
+        ImageIcon userData_HEAD_ICON = new ImageIcon("./Img/MyHead.jpg");
+        
         JButton userData_HEAD_CLICK = new JButton("上傳頭像");
+        
         JButton Lobby = new JButton("進入遊戲大廳");
         JButton Back = new JButton("返回");
         
