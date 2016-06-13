@@ -1,7 +1,5 @@
 
 package gameplatform;
-import gameplatform.Games.*;
-
 import java.awt.event.*;
 import java.awt.*;
 import javax.swing.*;
@@ -30,7 +28,7 @@ public class GamePlatform {
     public boolean threadFlag;
     public boolean exitGameFlag;
     
-    public int numberOfUsersInTheRoom = 0;
+    public int numberOfUsers = 0;
     public UserData[] userData = new UserData[20];
     
     public JLabel[] userHeadName = new JLabel[5];
@@ -43,9 +41,6 @@ public class GamePlatform {
     public String currentUserPicture = "";
     
     public UserData currentUser = new UserData();
-    
-    public JLabel myHeadName = new JLabel();
-    public JButton myHeadPic = new JButton();
     
     GamePlatform(){
         for (int i=0; i<5 ; i++){
@@ -83,14 +78,11 @@ public class GamePlatform {
         Lobby.setTitle("遊戲大廳");
         Lobby.setBounds(100,250,600,550);
         //Lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        getServerData();
+        headInitial();
         
-        getServerData();    //numberOfUsersInTheRoom initialized
-        setMyHead();
-        if(numberOfUsersInTheRoom>=2)   
-            setOthersHead();
- 
         setGamePlatformUI();
-        
         Lobby.addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent WE){
                 try{
@@ -109,31 +101,27 @@ public class GamePlatform {
         Thread messageHandler = new Thread(){
             public void run(){
                 String chatMessage = "";
-                /*
                 try{
                     Thread.sleep(3000);
                 }
                 catch(InterruptedException IE){
                     
                 }
-                */
+                
                 while(true && threadFlag){
                         try{
-                            //System.out.println("messageHandler 等待訊息中..");
                             chatMessage = getInputString();
-                            //System.out.println("in getInputString() down");
-                            //System.out.println(chatMessage);
+                            System.out.println(chatMessage);
                             //if (chatMessage.equals("1")){   getInputString();   }
                             if(chatMessage.equals("2") || chatMessage.equals("3")|| chatMessage.equals("4") || chatMessage.equals("5")){
-                                //System.out.println("in target1");
-                                numberOfUsersInTheRoom = Integer.valueOf(chatMessage);
-                                int otherUserIndex = numberOfUsersInTheRoom-2;
-                                addUserUI(otherUserIndex);
+                                System.out.println("in target1");
+                                numberOfUsers = Integer.valueOf(chatMessage);
+                                addUserUI(numberOfUsers-1);
                             }
                             else
                                 chatDisplay.append(chatMessage+"\n");
                             
-//System.out.println("receive: "+chatMessage);
+                            System.out.println("string: "+chatMessage);
                             
                         }
                         catch(Exception e){
@@ -154,115 +142,58 @@ public class GamePlatform {
     }
     public void getServerData(){
         
-        //currentUser.lobbyUserIndex = Integer.valueOf(this.getInputString());
-        numberOfUsersInTheRoom = Integer.valueOf(getInputString());
-        System.out.println("numberOfUsersInTheRoom= " +numberOfUsersInTheRoom);
         
-        for(int i=0; i<numberOfUsersInTheRoom-1; i++){
-            userData[i].Name = getInputString();
+       //System.out.println(this.getInputString());
+          
+        //System.out.println("numberOfUsers= " +getInputString());
+        numberOfUsers = Integer.valueOf(getInputString());
+        for(int i=0; i<numberOfUsers; i++){
+            userData[i].Name= getInputString();
             userData[i].pictureName = getInputString();
             System.out.println("userData["+i+"].Name="+userData[i].Name);
-                
-        }
-    }
-    public void gameFunctionThreadHandler(){
-        Thread GThread = new Thread(){
-        
-        };
-        
-        GThread.start();
-    }
-    public void gameFunction(JButton target, String currentUserName){
-        target.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent AE){
-                if(currentUserName.equals("釧庭"))
-                    writeOutString("【釧庭】負責【SocketServer, 聊天室, 打雜】");
-    
-                else if(currentUserName.equals("元米")){
-                    writeOutString("開始玩【男生女生配】");
-                    new Thread(){
-                        public void run(){
-                            new oxox();
-                        }
-                    }.start();
-                }
-
-                else if(currentUserName.equals("于萱")){
-                    writeOutString("【于萱】負責【資料整理, 介面美工, PPT, Class diagram】");
-                }
-                
-                else if(currentUserName.equals("思蓉")){
-                    writeOutString("開始玩【終極密碼】");
-                    new Thread(){
-                        public void run(){
-                            new Secret();
-                        }
-                    }.start();
-                }
-                    
-                else if(currentUserName.equals("岱比")){
-                    writeOutString("開始玩【記憶遊戲】");
-                    new Thread(){
-                        public void run(){
-                            new Memory();
-                        }
-                    }.start();
-                    
-                }
-
-                else
-                    System.out.println("比對錯誤QQ");
-                
-            }
-        });
+        } 
     }
     
-    public void setMyHead(){
-        myHeadName.setText(currentUser.Name);
-        myHeadName.setBounds(90,60,80,20);
-        myHeadPic.setIcon(new ImageIcon(currentUser.pictureName));
-        myHeadPic.setBounds(50,90,80,100);
-        Lobby.add(myHeadName);
-        Lobby.add(myHeadPic);
-        System.out.println("currentUser.lobbyUserIndex="+currentUser.lobbyUserIndex);
-        gameFunction(myHeadPic,currentUser.Name);
-    };
-    public void setOthersHead(){
-        for(int i=0; i<numberOfUsersInTheRoom-1; i++){
-            //System.out.println("in target2");
+    public void headInitial(){
+        for(int i=0; i<numberOfUsers; i++){
+            System.out.println("in target2");
             userHeadName[i].setText(userData[i].Name);
-            userHeadName[i].setBounds((i+2)*90,60,80,20);
+            userHeadName[i].setBounds((i+1)*90,60,80,20);
             
-            userHeadPic[i].setIcon(new ImageIcon(userData[i].pictureName));
-            userHeadPic[i].setBounds(50+((i+1)*100),90,80,100);
+            userHeadPic[i].setIcon(icons[i]);
+            userHeadPic[i].setBounds(50+(i*100),90,80,100);
             Lobby.add(userHeadName[i]);
             Lobby.add(userHeadPic[i]);
-            gameFunction(userHeadPic[i],userData[i].Name);
+
+            //Lobby.repaint();
         }
-        
-        Lobby.repaint();
     }
     
     public void addUserUI(int index){
         String temp = "";
-        System.out.println("numberOfUsersInTheRoom="+numberOfUsersInTheRoom);
-        for(int i=0; i<numberOfUsersInTheRoom-1; i++){
-            userData[index].Name = getInputString();
-            userData[index].pictureName = getInputString();
-            System.out.println("userData["+i+"].Name= "+userData[index].Name);
+        for(int i=0; i<numberOfUsers; i++){
+            
+            
+            if(i==numberOfUsers-1){
+                userData[index].Name = getInputString();
+                userData[index].pictureName = getInputString();
+            }
+                
+                
+            else   {
+                getInputString();
+                getInputString();
+            }
+            
         }
         userHeadName[index].setText(userData[index].Name);
-        userHeadName[index].setBounds((index+2)*90,60,80,20);
+        userHeadName[index].setBounds((index+1)*90,60,80,20);
             
-        userHeadPic[index].setIcon(new ImageIcon(userData[index].pictureName));
-        userHeadPic[index].setBounds(50+((index+1)*100),90,80,100);
+        userHeadPic[index].setIcon(icons[index]);
+        userHeadPic[index].setBounds(50+(index*100),90,80,100);
         Lobby.add(userHeadName[index]);
         Lobby.add(userHeadPic[index]);
-        
-        gameFunction(userHeadPic[index],userData[index].Name);
-        
         Lobby.repaint();
-        
     }
 
     public void setGamePlatformUI(){
@@ -294,14 +225,6 @@ public class GamePlatform {
         Lobby.add(chatDisplay);
         JTextField chatInput = new JTextField();
         chatInput.setBounds(50,440,500,30);
-        
-        JPanel painel = new JPanel(null);
-        painel.add(chatDisplay);
-        
-        
-        JScrollPane scroll = new JScrollPane (chatDisplay, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scroll.setBounds(50,230,500,200);
-        Lobby.add(scroll);
         Lobby.add(chatInput);
 
         Back.addActionListener(new ActionListener(){
@@ -480,8 +403,8 @@ public class GamePlatform {
         JLabel userData_PW = new JLabel("PW： ");
         JLabel userData_PW_VALUE = new JLabel(currentUser.PW);
         
-        JLabel numberOfUsersInTheRoomL = new JLabel("登入人數： ");
-        JLabel numberOfUsersInTheRoomV = new JLabel("999");
+        JLabel numberOfUsersL = new JLabel("登入人數： ");
+        JLabel numberOfUsersV = new JLabel("999");
         
         
         JButton userData_HEAD = new JButton();
@@ -499,8 +422,8 @@ public class GamePlatform {
         userDataD.add(userData_ID_VALUE);   userData_ID_VALUE.setBounds(50,40,70,20);
         userDataD.add(userData_PW);     userData_PW.setBounds(10,60,70,20);
         userDataD.add(userData_PW_VALUE);   userData_PW_VALUE.setBounds(50,60,70,20);
-        userDataD.add(numberOfUsersInTheRoomL);     numberOfUsersInTheRoomL.setBounds(10,90,100,20);
-        userDataD.add(numberOfUsersInTheRoomV);   numberOfUsersInTheRoomV.setBounds(80,90,100,20);
+        userDataD.add(numberOfUsersL);     numberOfUsersL.setBounds(10,90,100,20);
+        userDataD.add(numberOfUsersV);   numberOfUsersV.setBounds(80,90,100,20);
         
         
         userData_HEAD.setIcon(userData_HEAD_ICON);

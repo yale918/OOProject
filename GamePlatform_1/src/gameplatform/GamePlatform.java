@@ -9,21 +9,11 @@ import java.net.*;
 
 public class GamePlatform {
 
-    public String currentUserID = "";
-    public String currentUserPW = "";
-    public String currentUserName = "";
+    
     public JDialog SignIn;
     public JDialog userDataD;
     public ImageIcon[] icons = new ImageIcon[5];
     
-    public ImageIcon MyHeadImg = new ImageIcon("./Img/MyHead.jpg");
-    public ImageIcon Enemy1Img = new ImageIcon("./Img/Lazy.jpg");
-    public ImageIcon Enemy2Img = new ImageIcon("./Img/Chrng.jpg");
-    public ImageIcon Enemy3Img = new ImageIcon("./Img/Sena.png");
-    //public ImageIcon MyHeadImg = new ImageIcon(".\\Img\\MyHead.jpg");
-    //public ImageIcon Enemy1Img = new ImageIcon(".\\Img\\Lazy.jpg");
-    //public ImageIcon Enemy2Img = new ImageIcon(".\\Img\\Chrng.jpg");
-    //public ImageIcon Enemy3Img = new ImageIcon(".\\Img\\Sena.png");
     public TcpGameClient TGC;
     public JTextArea chatDisplay;
     public JFrame Lobby;
@@ -35,13 +25,18 @@ public class GamePlatform {
     
     public JLabel[] userHeadName = new JLabel[5];
     public JButton[] userHeadPic = new JButton[5];
+   
     
+    public String currentUserID = "";
+    public String currentUserPW = "";
+    public String currentUserName = "";
     public int currentUserIndex =0;
-    
+    public String currrentUserPicture ="";
+
     GamePlatform(){
         for (int i=0; i<5 ; i++){
             userData[i] = new UserData();
-            icons[i] = new ImageIcon("./Img/"+String.valueOf(i)+".jpg");
+            icons[i] = new ImageIcon("./src/Img/"+String.valueOf(i)+".jpg");
         }
         
         
@@ -150,22 +145,16 @@ public class GamePlatform {
             userHeadPic[i].setBounds(50+(i*100),90,80,100);
             Lobby.add(userHeadName[i]);
             Lobby.add(userHeadPic[i]);
-
-            //Lobby.repaint();
         }
     }
     
     public void addUserUI(int index){
         String temp = "";
         for(int i=0; i<numberOfUsers; i++){
-            
-            
             if(i==numberOfUsers-1){
                 userData[index].Name = getInputString();
                 userData[index].pictureName = getInputString();
             }
-                
-                
             else   {
                 getInputString();
                 getInputString();
@@ -181,23 +170,7 @@ public class GamePlatform {
         Lobby.add(userHeadPic[index]);
         Lobby.repaint();
     }
-    
-    /*
-    public void addUserUI(){
-        String KK = getInputString();
-        System.out.println("KK= "+KK);
-        System.out.println("in target2");
-        JLabel Enemy1 = new JLabel(KK);
-        Enemy1.setBounds(240,60,100,20);
-        Lobby.add(Enemy1);
-        JButton Enemy1B = new JButton();
-        Enemy1B.setIcon(Enemy1Img);
-        Enemy1B.setBounds(200,90,100,100);
-        Lobby.add(Enemy1B);
-        
-        Lobby.repaint();
-    }
-    */
+
     public void setGamePlatformUI(){
         /*  冒險者稱謂  */
         JLabel Name = new JLabel("親愛的 【" + currentUserName +" 】你好");
@@ -341,13 +314,8 @@ public class GamePlatform {
                 writeOutString("authencate");
                 writeOutString(id);
                 writeOutString(pw);
-                //System.out.println("in auth = getInputString() up");
                 auth = getInputString();
-                //String temp = getInputString();
-                //System.out.println("what we get is:"+temp);
-                //currentUserIndex = Integer.valueOf(temp);
-                //System.out.println("in auth = getInputString() down");
-                //System.out.println("auth: "+auth);
+
                 if(auth.equals("YES") ){
                     setCurrentUserData(getInputString(),id,pw);
                     createUserPage();
@@ -357,8 +325,6 @@ public class GamePlatform {
                 }
                 else 
                     JOptionPane.showMessageDialog(null, "請先註冊", "帳號不存在",JOptionPane.INFORMATION_MESSAGE );
-
-        
             }
 
             private void println(String string) {
@@ -371,9 +337,7 @@ public class GamePlatform {
                 System.out.println("in SignIn close event");
                 try{
                     writeOutString("leaveGame");
-                    //System.out.println("leaveGame");
                     threadFlag = false;
-                    //System.out.println("threadFlag set to false;");
                     System.exit(0);
                 }
                 catch(Exception E1){
@@ -382,8 +346,7 @@ public class GamePlatform {
                 
             }
         });
-    
-        
+  
         regist.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent AE){
                 createRegistPage();
@@ -548,12 +511,12 @@ public class GamePlatform {
    
     } 
  
-    public void setCurrentUserData(String Name, String ID, String PW){
-        
-        //System.out.println("Name="+Name);
+    public void setCurrentUserData(String Name, String ID, String PW/*, int index, String pic*/){
         currentUserName = Name;
         currentUserID = ID;
         currentUserPW = PW;
+        //currentUserIndex =0;
+        //currrentUserPicture ="";
     }
 
     public static void main(String[] args) {
