@@ -15,15 +15,6 @@ public class GamePlatform {
     public JDialog SignIn;
     public JDialog userDataD;
     public ImageIcon[] icons = new ImageIcon[5];
-    
-    public ImageIcon MyHeadImg = new ImageIcon("./Img/MyHead.jpg");
-    public ImageIcon Enemy1Img = new ImageIcon("./Img/Lazy.jpg");
-    public ImageIcon Enemy2Img = new ImageIcon("./Img/Chrng.jpg");
-    public ImageIcon Enemy3Img = new ImageIcon("./Img/Sena.png");
-    //public ImageIcon MyHeadImg = new ImageIcon(".\\Img\\MyHead.jpg");
-    //public ImageIcon Enemy1Img = new ImageIcon(".\\Img\\Lazy.jpg");
-    //public ImageIcon Enemy2Img = new ImageIcon(".\\Img\\Chrng.jpg");
-    //public ImageIcon Enemy3Img = new ImageIcon(".\\Img\\Sena.png");
     public TcpGameClient TGC;
     public JTextArea chatDisplay;
     public JFrame Lobby;

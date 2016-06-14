@@ -8,6 +8,35 @@ package gameplatform.Games;
 import java.lang.*;
 import javax.swing.*;
 import java.util.*;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class Secret {
 	
 	 public Secret()

@@ -111,11 +111,12 @@ class newframe extends JFrame{
 	JLabel label = new JLabel();
 	JLabel timecount;//顯示翻牌幾次的值
 	String s,ff;
-	int pushnum = 0,sum=0;//計算翻牌次數
+	int pushnum = 0,sum=0;//計算按下次數與計算翻牌次數
+	int win=0;//成功次數
+	int x=0,y=0;//介面調整
 	
 	public newframe(){//遊戲介面
-		int x=0,y=0;
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(300,100,600,600);
 		setTitle("叫我記憶王");
 		pane = new JPanel();
@@ -134,7 +135,7 @@ class newframe extends JFrame{
 		final ImageIcon newback = new ImageIcon(newimage0);
 		
 		memory = new JButton("新局開始");
-		memory.setBounds(250,125,100,25);
+		memory.setBounds(250,150,100,25);
 		pane.add(memory);
 		
 		timecount = new JLabel();//記錄翻牌次數
@@ -168,7 +169,7 @@ class newframe extends JFrame{
 				
 			}
 		});
-
+		
 		for(int i=0;i<buttons.length;i++){//一個一個跑
 
 			buttons[i] = new JButton();//按鈕排版
@@ -207,16 +208,18 @@ class newframe extends JFrame{
 					first.setIcon(newback);//否則就變回原本的卡片背面圖
 					second.setIcon(newback);
 				}
+				
 			  ff="";//歸零
 			  s="";
 			  pushnum=0;
+
 			}
 				timecount.setText("總翻牌次數:"+String.valueOf(sum));//顯示總翻牌次數
 		  }
 		 });
 		}
 
-				
+		
 	setVisible(true);
 	}
 }

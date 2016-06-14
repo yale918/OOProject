@@ -47,21 +47,41 @@ public class GamePlatform {
     public JLabel myHeadName = new JLabel();
     public JButton myHeadPic = new JButton();
     
+    public JTextField smallInput = new JTextField();
+    public JLabel smallLabel = new JLabel("小遊戲用: ");
+    public JButton smallButton = new JButton();
     GamePlatform(){
         for (int i=0; i<5 ; i++){
             userData[i] = new UserData();
             icons[i] = new ImageIcon("./src/Img/"+String.valueOf(i)+".jpg");
         }
-        
-        
+               
         createSignIn();
-        //socketTester();
+        
         try{    TGC = new TcpGameClient();    }
         catch(Exception E){     System.out.println(E);        }
 
-        //createGamePlatform();
     }
     
+    
+    public void setSmallInput(boolean bol){
+        smallInput.setVisible(bol);
+        smallLabel.setVisible(bol);
+        smallButton.setVisible(bol);
+    }
+    public void createSmallInput(){
+        smallLabel.setBounds(80,480,100,30);
+        Lobby.add(smallLabel);
+        smallInput.setBounds(150,480,100,30);
+        Lobby.add(smallInput);
+        smallButton.setBounds(260,480,100,30);
+        smallButton.setText("結束小遊戲");
+        Lobby.add(smallButton);
+        
+        setSmallInput(false);
+    
+    }
+
     public void createGamePlatform(){
         threadFlag = true;
         exitGameFlag = false;
@@ -83,6 +103,7 @@ public class GamePlatform {
         Lobby.setTitle("遊戲大廳");
         Lobby.setBounds(100,250,600,550);
         //Lobby.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
         
         getServerData();    //numberOfUsersInTheRoom initialized
         setMyHead();
@@ -182,7 +203,11 @@ public class GamePlatform {
                     writeOutString("開始玩【男生女生配】");
                     new Thread(){
                         public void run(){
-                            new oxox();
+                            setSmallInput(true);
+                            Lobby.repaint();
+                            try {   new oxox(smallInput,chatDisplay,smallButton);    } 
+                            catch(Exception E){}
+                            setSmallInput(false);
                         }
                     }.start();
                 }
@@ -192,10 +217,14 @@ public class GamePlatform {
                 }
                 
                 else if(currentUserName.equals("思蓉")){
-                    writeOutString("開始玩【終極密碼】");
+                    writeOutString("開始玩【猜數字】");
                     new Thread(){
                         public void run(){
-                            new Secret();
+                            setSmallInput(true);
+                            Lobby.repaint();
+                            try {   new KnowledgePlus(smallInput,chatDisplay,smallButton);    } 
+                            catch(IOException IOE){}
+                            setSmallInput(false);
                         }
                     }.start();
                 }
@@ -522,6 +551,9 @@ public class GamePlatform {
                 userDataD.setVisible(false);
                 writeOutString("gameLobbyInitialize");
                 createGamePlatform();
+                createSmallInput();
+                
+                
                 //System.out.println("cutName="+currentUserName);
             }
         });
